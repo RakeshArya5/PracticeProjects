@@ -1,0 +1,18 @@
+install.packages("swirl")
+library(swirl)
+swirl()
+Rakesh
+swirl()
+cars
+class(cars)
+str(cars)
+which (cars$dist == 85)
+x <- c(2.23, 3.45, 1.87, 2.11, 7.33, 18.34, 19.23)
+mean(x)
+
+x <- 1:10
+y <- rnorm(10)
+plot(x,y)
+
+fit <- lm(y~x)
+fit
