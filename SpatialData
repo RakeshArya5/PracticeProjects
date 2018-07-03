@@ -1,0 +1,64 @@
+library(rgdal)
+library(rgeos)
+#GDAL - geospatial abstraction library
+
+lnd <- readOGR(dsn="data",layer = "london_sport") #this function loads shape files (.shp)
+
+#india <- readOGR(dsn="data" , layer = "IND_adm3")
+#plot(india)
+
+#The shapefile format is a popular geospatial vector data format for geographic information system (GIS) software
+# Analyse london sports data
+head(lnd@data)
+mean(lnd$Partic_Per)
+# @ is used to refer to the slots
+sapply(lnd@data, class)
+lnd$Pop_2001 <- as.numeric(as.character(lnd$Pop_2001))
+nrow(lnd)
+ncol(lnd)
+plot(lnd)
+# good to know - What is Polymorphism - if anything (like plot) changes it function or behavoiur as per the input recieved, this property is called polymorphism
+lnd@data[lnd$Partic_Per < 15,]
+
+#select zones where sports participatio is between 20 and 25 %
+sel <- lnd$Partic_Per > 20 & lnd$Partic_Per < 25
+plot(lnd[sel,])
+head(sel)
+
+#plot colorful maps
+plot(lnd, col = "lightgray")
+#highlighting the area where sprots participation is between 20 and 25%
+plot(lnd[sel, ], col = "turquoise", add = TRUE)
+
+#find the center of the London area
+lat <- coordinates(gCentroid(lnd))[[1]]
+lng <- coordinates(gCentroid(lnd))[[2]]
+
+# arguments to test whether or not a coordinate is east or north of the centre
+east <- sapply(coordinates(lnd)[,1], function(x) x > lat)
+north <- sapply(coordinates(lnd)[,2], function(x) x > lng)
+
+west <- sapply(coordinates(lnd)[,1], function(x) x < lat)
+south <- sapply(coordinates(lnd)[,2], function(x) x < lng)
+
+# test if the coordinate is east and north of the centre
+lnd@data$quadrant[east & north] <- "northeast"
+#north west
+lnd@data$quadrant[west & north] <- "northwest"
+#south west
+lnd@data$quadrant[west & south] <- "southwest"
+#south east
+lnd@data$quadrant[east & south] <- "southeast"
+
+
+#sel_east <- !is.na(lnd$quadrant)
+sel_ne <- lnd$quadrant == "northeast"
+sel_nw <- lnd$quadrant == "northwest"
+sel_se <- lnd$quadrant == "southeast"
+sel_sw <- lnd$quadrant == "southwest"
+#plotting graphs
+plot(lnd, col = "lightgray")
+plot(lnd[sel_ne, ], col = "red", add = TRUE)
+plot(lnd[sel_nw, ], col = "green", add = TRUE)
+plot(lnd[sel_sw, ], col = "blue", add = TRUE)
+plot(lnd[sel_se, ], col = "yellow", add = TRUE)
